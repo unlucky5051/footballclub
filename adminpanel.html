@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Градиентный фон в футбольном стиле */
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Стиль для навигационной панели */
+        .navbar {
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #fff !important;
+        }
+
+        /* Стиль для контейнера */
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Стиль для кнопок */
+        .btn-primary {
+            background-color: #ff6f61;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #ff3b2f;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        /* Стиль для таблиц */
+        .table {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .table th, .table td {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .table thead th {
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Стиль для модальных окон */
+        .modal-content {
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            border-radius: 10px;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Стиль для выпадающего списка */
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            box-shadow: none;
+        }
+
+        /* Стиль для заголовков */
+        h1, h2 {
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Анимация для кнопок */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-primary, .btn-warning, .btn-danger {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">⚽ Панель администратора</a>
+            <div class="d-flex">
+                <button class="btn btn-outline-light" onclick="logout()">Выход</button>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Добро пожаловать, Администратор!</h1>
+        <p>Здесь вы можете управлять пользователями, командами и их составом.</p>
+
+        <!-- Таблица для управления пользователями -->
+        <h2>Пользователи</h2>
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            Добавить пользователя
+        </button>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Имя пользователя</th>
+                    <th>Email</th>
+                    <th>Роль</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+                <!-- Данные будут загружены с помощью JavaScript -->
+            </tbody>
+        </table>
+
+        <!-- Таблица для управления командами -->
+        <h2>Команды</h2>
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addTeamModal">
+            Добавить команду
+        </button>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название команды</th>
+                    <th>Год основания</th>
+                    <th>Стадион</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="teamsTableBody">
+                <!-- Данные будут загружены с помощью JavaScript -->
+            </tbody>
+        </table>
+
+        <!-- Таблица для управления составом команд -->
+        <h2>Состав команд</h2>
+        <div class="mb-3">
+            <label for="teamSelect">Выберите команду:</label>
+            <select class="form-control" id="teamSelect" onchange="loadTeamPlayers()">
+                <!-- Опции будут загружены с помощью JavaScript -->
+            </select>
+        </div>
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addPlayerModal">
+            Добавить игрока
+        </button>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Имя</th>
+                    <th>Фамилия</th>
+                    <th>Дата рождения</th>
+                    <th>Национальность</th>
+                    <th>Позиция</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="playersTableBody">
+                <!-- Данные будут загружены с помощью JavaScript -->
+            </tbody>
+        </table>
+
+        <!-- Модальные окна -->
+        <!-- Модальное окно для добавления пользователя -->
+        <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addUserModalLabel">Добавить пользователя</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addUserForm">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Имя пользователя</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Пароль</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="role_id" class="form-label">Роль</label>
+                                <select class="form-control" id="role_id" name="role_id" required>
+                                    <option value="1">Администратор</option>
+                                    <option value="2">Тренер</option>
+                                    <option value="3">Игрок</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" onclick="addUser()">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для редактирования пользователя -->
+        <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editUserModalLabel">Редактировать пользователя</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editUserForm">
+                            <input type="hidden" id="edit_user_id" name="user_id">
+                            <div class="mb-3">
+                                <label for="edit_username" class="form-label">Имя пользователя</label>
+                                <input type="text" class="form-control" id="edit_username" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_password" class="form-label">Пароль</label>
+                                <input type="password" class="form-control" id="edit_password" name="password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="edit_email" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_role_id" class="form-label">Роль</label>
+                                <select class="form-control" id="edit_role_id" name="role_id" required>
+                                    <option value="1">Администратор</option>
+                                    <option value="2">Тренер</option>
+                                    <option value="3">Игрок</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" onclick="saveUserChanges()">Сохранить изменения</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для добавления команды -->
+        <div class="modal fade" id="addTeamModal" tabindex="-1" aria-labelledby="addTeamModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addTeamModalLabel">Добавить команду</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addTeamForm">
+                            <div class="mb-3">
+                                <label for="team_name" class="form-label">Название команды</label>
+                                <input type="text" class="form-control" id="team_name" name="team_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="founded_year" class="form-label">Год основания</label>
+                                <input type="number" class="form-control" id="founded_year" name="founded_year">
+                            </div>
+                            <div class="mb-3">
+                                <label for="stadium" class="form-label">Стадион</label>
+                                <input type="text" class="form-control" id="stadium" name="stadium">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" onclick="addTeam()">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для редактирования команды -->
+        <div class="modal fade" id="editTeamModal" tabindex="-1" aria-labelledby="editTeamModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editTeamModalLabel">Редактировать команду</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editTeamForm">
+                            <input type="hidden" id="edit_team_id" name="team_id">
+                            <div class="mb-3">
+                                <label for="edit_team_name" class="form-label">Название команды</label>
+                                <input type="text" class="form-control" id="edit_team_name" name="team_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_founded_year" class="form-label">Год основания</label>
+                                <input type="number" class="form-control" id="edit_founded_year" name="founded_year">
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_stadium" class="form-label">Стадион</label>
+                                <input type="text" class="form-control" id="edit_stadium" name="stadium">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" onclick="saveTeamChanges()">Сохранить изменения</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для добавления игрока -->
+        <div class="modal fade" id="addPlayerModal" tabindex="-1" aria-labelledby="addPlayerModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addPlayerModalLabel">Добавить игрока</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addPlayerForm">
+                            <div class="mb-3">
+                                <label for="first_name" class="form-label">Имя</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="last_name" class="form-label">Фамилия</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="date_of_birth" class="form-label">Дата рождения</label>
+                                <input type="date" class="form-control" id="date_of_birth" name="date_of_birth">
+                            </div>
+                            <div class="mb-3">
+                                <label for="nationality" class="form-label">Национальность</label>
+                                <input type="text" class="form-control" id="nationality" name="nationality">
+                            </div>
+                            <div class="mb-3">
+                                <label for="position" class="form-label">Позиция</label>
+                                <input type="text" class="form-control" id="position" name="position">
+                            </div>
+                            <div class="mb-3">
+                                <label for="team_id" class="form-label">Команда</label>
+                                <select class="form-control" id="team_id" name="team_id" required>
+                                    <!-- Опции будут загружены с помощью JavaScript -->
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" onclick="addPlayer()">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для редактирования игрока -->
+        <div class="modal fade" id="editPlayerModal" tabindex="-1" aria-labelledby="editPlayerModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editPlayerModalLabel">Редактировать игрока</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editPlayerForm">
+                            <input type="hidden" id="edit_player_id" name="player_id">
+                            <div class="mb-3">
+                                <label for="edit_first_name" class="form-label">Имя</label>
+                                <input type="text" class="form-control" id="edit_first_name" name="first_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_last_name" class="form-label">Фамилия</label>
+                                <input type="text" class="form-control" id="edit_last_name" name="last_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_date_of_birth" class="form-label">Дата рождения</label>
+                                <input type="date" class="form-control" id="edit_date_of_birth" name="date_of_birth">
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_nationality" class="form-label">Национальность</label>
+                                <input type="text" class="form-control" id="edit_nationality" name="nationality">
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_position" class="form-label">Позиция</label>
+                                <input type="text" class="form-control" id="edit_position" name="position">
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_team_id" class="form-label">Команда</label>
+                                <select class="form-control" id="edit_team_id" name="team_id" required>
+                                    <!-- Опции будут загружены с помощью JavaScript -->
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" onclick="savePlayerChanges()">Сохранить изменения</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Подключение Bootstrap JS и jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // Функция для загрузки пользователей
+        function loadUsers() {
+            $.ajax({
+                url: '/api/users',
+                method: 'GET',
+                success: function(data) {
+                    const tbody = $('#usersTableBody');
+                    tbody.empty();
+                    data.forEach(user => {
+                        const row = `
+                            <tr>
+                                <td>${user.user_id}</td>
+                                <td>${user.username}</td>
+                                <td>${user.email}</td>
+                                <td>${user.role_name}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="openEditUserModal(${user.user_id})">Редактировать</button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.user_id})">Удалить</button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при загрузке пользователей:", error);
+                }
+            });
+        }
+
+        // Функция для добавления пользователя
+        function addUser() {
+            const formData = {
+                username: $('#username').val(),
+                password: $('#password').val(),
+                email: $('#email').val(),
+                role_id: $('#role_id').val()
+            };
+
+            $.ajax({
+                url: '/api/users',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    $('#addUserModal').modal('hide');
+                    loadUsers(); // Обновляем таблицу пользователей
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при добавлении пользователя:", error);
+                }
+            });
+        }
+
+        // Функция для открытия модального окна редактирования пользователя
+        function openEditUserModal(userId) {
+            $.ajax({
+                url: `/api/users/${userId}`,
+                method: 'GET',
+                success: function(user) {
+                    $('#edit_user_id').val(user.user_id);
+                    $('#edit_username').val(user.username);
+                    $('#edit_password').val(user.password);
+                    $('#edit_email').val(user.email);
+                    $('#edit_role_id').val(user.role_id.role_id);
+
+                    // Открываем модальное окно
+                    $('#editUserModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при получении данных пользователя:", error);
+                }
+            });
+        }
+
+        // Функция для сохранения изменений пользователя
+        function saveUserChanges() {
+            const userId = $('#edit_user_id').val();
+            const formData = {
+                username: $('#edit_username').val(),
+                password: $('#edit_password').val(),
+                email: $('#edit_email').val(),
+                role_id: $('#edit_role_id').val()
+            };
+
+            $.ajax({
+                url: `/api/users/${userId}`,
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    $('#editUserModal').modal('hide');
+                    loadUsers(); // Обновляем таблицу пользователей
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при сохранении изменений пользователя:", error);
+                }
+            });
+        }
+
+        // Функция для удаления пользователя
+        function deleteUser(userId) {
+            if (confirm('Вы уверены, что хотите удалить этого пользователя?')) {
+                $.ajax({
+                    url: `/api/users/${userId}`,
+                    method: 'DELETE',
+                    success: function() {
+                        loadUsers(); // Обновляем таблицу пользователей
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Ошибка при удалении пользователя:", error);
+                    }
+                });
+            }
+        }
+
+        // Функция для загрузки команд
+        function loadTeams() {
+            $.ajax({
+                url: '/api/teams',
+                method: 'GET',
+                success: function(data) {
+                    const tbody = $('#teamsTableBody');
+                    tbody.empty();
+                    data.forEach(team => {
+                        const row = `
+                            <tr>
+                                <td>${team.team_id}</td>
+                                <td>${team.team_name}</td>
+                                <td>${team.founded_year}</td>
+                                <td>${team.stadium}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="openEditTeamModal(${team.team_id})">Редактировать</button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteTeam(${team.team_id})">Удалить</button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+
+                    // Загрузка списка команд в выпадающий список
+                    const teamSelect = $('#teamSelect');
+                    teamSelect.empty();
+                    data.forEach(team => {
+                        teamSelect.append(`<option value="${team.team_id}">${team.team_name}</option>`);
+                    });
+
+                    // Загрузка игроков для первой команды
+                    if (data.length > 0) {
+                        loadTeamPlayers(data[0].team_id);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при загрузке команд:", error);
+                }
+            });
+        }
+
+        // Функция для добавления команды
+        function addTeam() {
+            const formData = {
+                team_name: $('#team_name').val(),
+                founded_year: $('#founded_year').val(),
+                stadium: $('#stadium').val()
+            };
+
+            $.ajax({
+                url: '/api/teams',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    $('#addTeamModal').modal('hide');
+                    loadTeams(); // Обновляем таблицу команд
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при добавлении команды:", error);
+                }
+            });
+        }
+
+        // Функция для открытия модального окна редактирования команды
+        function openEditTeamModal(teamId) {
+            $.ajax({
+                url: `/api/teams/${teamId}`,
+                method: 'GET',
+                success: function(team) {
+                    $('#edit_team_id').val(team.team_id);
+                    $('#edit_team_name').val(team.team_name);
+                    $('#edit_founded_year').val(team.founded_year);
+                    $('#edit_stadium').val(team.stadium);
+
+                    // Открываем модальное окно
+                    $('#editTeamModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при получении данных команды:", error);
+                }
+            });
+        }
+
+        // Функция для сохранения изменений команды
+        function saveTeamChanges() {
+            const teamId = $('#edit_team_id').val();
+            const formData = {
+                team_name: $('#edit_team_name').val(),
+                founded_year: $('#edit_founded_year').val(),
+                stadium: $('#edit_stadium').val()
+            };
+
+            $.ajax({
+                url: `/api/teams/${teamId}`,
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    $('#editTeamModal').modal('hide');
+                    loadTeams(); // Обновляем таблицу команд
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при сохранении изменений команды:", error);
+                }
+            });
+        }
+
+        // Функция для удаления команды
+        function deleteTeam(teamId) {
+            if (confirm('Вы уверены, что хотите удалить эту команду?')) {
+                $.ajax({
+                    url: `/api/teams/${teamId}`,
+                    method: 'DELETE',
+                    success: function() {
+                        loadTeams(); // Обновляем таблицу команд
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Ошибка при удалении команды:", error);
+                    }
+                });
+            }
+        }
+
+        // Функция для загрузки игроков команды
+        function loadTeamPlayers() {
+            const teamId = $('#teamSelect').val(); // Получаем выбранный ID команды
+            $.ajax({
+                url: `/api/teams/${teamId}/players`,
+                method: 'GET',
+                success: function(data) {
+                    const tbody = $('#playersTableBody');
+                    tbody.empty();
+                    data.forEach(player => {
+                        const row = `
+                            <tr>
+                                <td>${player.player_id}</td>
+                                <td>${player.first_name}</td>
+                                <td>${player.last_name}</td>
+                                <td>${player.date_of_birth}</td>
+                                <td>${player.nationality}</td>
+                                <td>${player.position}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="openEditPlayerModal(${player.player_id})">Редактировать</button>
+                                    <button class="btn btn-sm btn-danger" onclick="deletePlayer(${player.player_id})">Удалить</button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при загрузке игроков:", error);
+                }
+            });
+        }
+
+        // Функция для удаления игрока
+        function deletePlayer(playerId) {
+            if (confirm('Вы уверены, что хотите удалить этого игрока?')) {
+                $.ajax({
+                    url: `/api/players/${playerId}`,
+                    method: 'DELETE',
+                    success: function() {
+                        loadTeamPlayers(); // Обновляем таблицу игроков
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Ошибка при удалении игрока:", error);
+                    }
+                });
+            }
+        }
+
+        // Функция для добавления игрока
+        function addPlayer() {
+            const formData = {
+                first_name: $('#first_name').val(),
+                last_name: $('#last_name').val(),
+                date_of_birth: $('#date_of_birth').val(),
+                nationality: $('#nationality').val(),
+                position: $('#position').val(),
+                team_id: $('#team_id').val()
+            };
+
+            console.log("Данные для отправки:", formData); // Логируем данные
+
+            $.ajax({
+                url: '/api/players',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    $('#addPlayerModal').modal('hide'); // Закрываем модальное окно
+                    loadTeamPlayers(); // Обновляем таблицу игроков
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при добавлении игрока:", error);
+                }
+            });
+        }
+
+        // Функция для загрузки списка команд в модальное окно добавления игрока
+        function loadTeamsForPlayerModal() {
+            $.ajax({
+                url: '/api/teams',
+                method: 'GET',
+                success: function(data) {
+                    const teamSelect = $('#team_id');
+                    teamSelect.empty();
+                    data.forEach(team => {
+                        teamSelect.append(`<option value="${team.team_id}">${team.team_name}</option>`);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при загрузке списка команд:", error);
+                }
+            });
+        }
+
+        // Функция для открытия модального окна редактирования игрока
+        function openEditPlayerModal(playerId) {
+            $.ajax({
+                url: `/api/players/${playerId}`,
+                method: 'GET',
+                success: function(player) {
+                    $('#edit_player_id').val(player.player_id);
+                    $('#edit_first_name').val(player.first_name);
+                    $('#edit_last_name').val(player.last_name);
+                    $('#edit_date_of_birth').val(player.date_of_birth);
+                    $('#edit_nationality').val(player.nationality);
+                    $('#edit_position').val(player.position);
+                    $('#edit_team_id').val(player.team_id);
+
+                    // Загружаем список команд в выпадающий список
+                    loadTeamsForEditPlayerModal();
+
+                    // Открываем модальное окно
+                    $('#editPlayerModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при получении данных игрока:", error);
+                }
+            });
+        }
+
+        // Функция для загрузки списка команд в модальное окно редактирования игрока
+        function loadTeamsForEditPlayerModal() {
+            $.ajax({
+                url: '/api/teams',
+                method: 'GET',
+                success: function(data) {
+                    const teamSelect = $('#edit_team_id');
+                    teamSelect.empty();
+                    data.forEach(team => {
+                        teamSelect.append(`<option value="${team.team_id}">${team.team_name}</option>`);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при загрузке списка команд:", error);
+                }
+            });
+        }
+
+        // Функция для сохранения изменений игрока
+        function savePlayerChanges() {
+            const playerId = $('#edit_player_id').val();
+            const formData = {
+                first_name: $('#edit_first_name').val(),
+                last_name: $('#edit_last_name').val(),
+                date_of_birth: $('#edit_date_of_birth').val(),
+                nationality: $('#edit_nationality').val(),
+                position: $('#edit_position').val(),
+                team_id: $('#edit_team_id').val()
+            };
+
+            $.ajax({
+                url: `/api/players/${playerId}`,
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    $('#editPlayerModal').modal('hide');
+                    loadTeamPlayers(); // Обновляем таблицу игроков
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при сохранении изменений игрока:", error);
+                }
+            });
+        }
+
+        // Функция для выхода
+        function logout() {
+            window.location.href = '/logout'; // Перенаправляем на маршрут /logout
+        }
+
+        // Загрузка данных при загрузке страницы
+        $(document).ready(function() {
+            loadUsers();
+            loadTeams();
+        });
+
+        // Загрузка списка команд при открытии модального окна добавления игрока
+        $('#addPlayerModal').on('show.bs.modal', function () {
+            loadTeamsForPlayerModal();
+        });
+    </script>
+</body>
+</html>

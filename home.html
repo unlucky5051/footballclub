@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Футбольный клуб - {{ team.team_name if team else 'Название команды' }}</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Градиентный фон для всей страницы */
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Стиль для навигационной панели */
+        .navbar {
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #fff !important;
+        }
+
+        .btn-login, .btn-register {
+            margin-left: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-login:hover, .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Стиль для контейнера */
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Стиль для карточек */
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .card-text {
+            color: #ddd;
+        }
+
+        /* Стиль для заголовков */
+        h1, h2 {
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Анимация для кнопок */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-primary, .btn-warning, .btn-danger {
+            animation: pulse 2s infinite;
+        }
+
+        /* Стиль для таблиц */
+        .table {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .table th, .table td {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .table thead th {
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Стиль для модальных окон */
+        .modal-content {
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Стиль для выпадающего списка */
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            box-shadow: none;
+        }
+
+        /* Анимация для карточек */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигационная панель -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Футбольный клуб: {{ team.team_name if team else 'Название команды' }}</a>
+            <div class="d-flex">
+                <a href="/login" class="btn btn-outline-light btn-login">Логин</a>
+                <a href="/register" class="btn btn-outline-light btn-register">Регистрация</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Информация о команде -->
+        <div class="team-info">
+            <h2 class="text-center my-4">Информация о команде</h2>
+            {% if team %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ team.team_name }}</h5>
+                        <p class="card-text"><strong>Год основания:</strong> {{ team.founded_year }}</p>
+                        <p class="card-text"><strong>Стадион:</strong> {{ team.stadium }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <p>Информация о команде недоступна.</p>
+            {% endif %}
+        </div>
+
+        <!-- Список игроков -->
+        <div class="players-list">
+            <h2 class="text-center my-4">Игроки команды</h2>
+            <div class="row">
+                {% if players %}
+                    {% for player in players %}
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ player.first_name }} {{ player.last_name }}</h5>
+                                    <p class="card-text"><strong>Позиция:</strong> {{ player.position }}</p>
+                                    <p class="card-text"><strong>Дата рождения:</strong> {{ player.date_of_birth }}</p>
+                                    <p class="card-text"><strong>Национальность:</strong> {{ player.nationality }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Информация об игроках недоступна.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Список матчей -->
+        <div class="matches-list">
+            <h2 class="text-center my-4">Матчи команды</h2>
+            <div class="row">
+                {% if matches %}
+                    {% for match in matches %}
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ match.match_date }}</h5>
+                                    <p class="card-text">
+                                        <strong>{{ match.home_team_id.team_name }}</strong> vs
+                                        <strong>{{ match.away_team_id.team_name }}</strong>
+                                    </p>
+                                    <p class="card-text"><strong>Счет:</strong> {{ match.score }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Информация о матчах недоступна.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключение Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

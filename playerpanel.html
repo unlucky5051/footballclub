@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель игрока</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Градиентный фон для всей страницы */
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Стиль для навигационной панели */
+        .navbar {
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #fff !important;
+        }
+
+        /* Стиль для контейнера */
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Стиль для карточек */
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .card-text {
+            color: #ddd;
+        }
+
+        /* Стиль для таблиц */
+        .table {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .table th, .table td {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .table thead th {
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Анимация для карточек */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">⚽ Панель игрока</a>
+            <div class="d-flex">
+                <button class="btn btn-outline-light" onclick="logout()">Выход</button>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Добро пожаловать, Игрок!</h1>
+        <p>Здесь вы можете просматривать свою статистику, статистику своей команды и других команд, а также информацию о матчах.</p>
+
+        <!-- Статистика игроков своей команды -->
+        <h2>Статистика игроков вашей команды</h2>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Имя</th>
+                        <th>Голы</th>
+                        <th>Ассисты</th>
+                        <th>Желтые карточки</th>
+                        <th>Красные карточки</th>
+                    </tr>
+                </thead>
+                <tbody id="teamPlayersStats">
+                    <!-- Данные будут загружены с помощью JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Статистика других игроков -->
+        <h2>Статистика других игроков</h2>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Имя</th>
+                        <th>Голы</th>
+                        <th>Ассисты</th>
+                        <th>Желтые карточки</th>
+                        <th>Красные карточки</th>
+                    </tr>
+                </thead>
+                <tbody id="otherPlayersStats">
+                    <!-- Данные будут загружены с помощью JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Информация о своей команде -->
+        <h2>Информация о вашей команде</h2>
+        <div class="card">
+            <div class="card-body" id="teamInfo">
+                <!-- Данные будут загружены с помощью JavaScript -->
+            </div>
+        </div>
+
+        <!-- Информация о других командах -->
+        <h2>Информация о других командах</h2>
+        <div class="row" id="otherTeamsInfo">
+            <!-- Данные будут загружены с помощью JavaScript -->
+        </div>
+
+        <!-- Предыдущие матчи -->
+        <h2>Предыдущие матчи</h2>
+        <div class="row" id="pastMatches">
+            <!-- Данные будут загружены с помощью JavaScript -->
+        </div>
+
+        <!-- Будущие матчи -->
+        <h2>Будущие матчи</h2>
+        <div class="row" id="upcomingMatches">
+            <!-- Данные будут загружены с помощью JavaScript -->
+        </div>
+    </div>
+
+    <!-- Подключение Bootstrap JS и jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // Функция для загрузки статистики игроков своей команды
+        function loadTeamPlayersStats() {
+            $.ajax({
+                url: '/api/players/stats/team', // Замените на ваш API-эндпоинт
+                method: 'GET',
+                success: function(data) {
+                    const tbody = $('#teamPlayersStats');
+                    tbody.empty();
+                    data.forEach(player => {
+                        const row = `
+                            <tr>
+                                <td>${player.first_name} ${player.last_name}</td>
+                                <td>${player.goals}</td>
+                                <td>${player.assists}</td>
+                                <td>${player.yellow_cards}</td>
+                                <td>${player.red_cards}</td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при загрузке статистики игроков команды:", error);
+                }
+            });
+        }
+
+        // Функция для загрузки статистики других игроков
+        function loadOtherPlayersStats() {
+            $.ajax({
+                url: '/api/players/stats/other', // Замените на ваш API-эндпоинт
+                method: 'GET',
+                success: function(data) {
+                    const tbody = $('#otherPlayersStats');
+                    tbody.empty();
+                    data.forEach(player => {
+                        const row = `
+                            <tr>
+                                <td>${player.first_name} ${player.last_name}</td>
+                                <td>${player.goals}</td>
+                                <td>${player.assists}</td>
+                                <td>${player.yellow_cards}</td>
+                                <td>${player.red_cards}</td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при загрузке статистики других игроков:", error);
+                }
+            });
+        }
+
+        // Функция для загрузки информации о своей команде
+        function loadTeamInfo() {
+            $.ajax({
+                url: '/api/teams/my', // Замените на ваш API-эндпоинт
+                method: 'GET',
+                success: function(team) {
+                    const teamInfo = $('#teamInfo');
+                    teamInfo.html(`
+                        <h5 class="card-title">${team.team_name}</h5>
+                        <p class="card-text"><strong>Год основания:</strong> ${team.founded_year}</p>
+                        <p class="card-text"><strong>Стадион:</strong> ${team.stadium}</p>
+                    `);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при загрузке информации о команде:", error);
+                }
+            });
+        }
+
+        // Функция для загрузки информации о других командах
+        function loadOtherTeamsInfo() {
+            $.ajax({
+                url: '/api/teams/other', // Замените на ваш API-эндпоинт
+                method: 'GET',
+                success: function(data) {
+                    const otherTeamsInfo = $('#otherTeamsInfo');
+                    otherTeamsInfo.empty();
+                    data.forEach(team => {
+                        const card = `
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${team.team_name}</h5>
+                                        <p class="card-text"><strong>Год основания:</strong> ${team.founded_year}</p>
+                                        <p class="card-text"><strong>Стадион:</strong> ${team.stadium}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        otherTeamsInfo.append(card);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при загрузке информации о других командах:", error);
+                }
+            });
+        }
+
+        // Функция для загрузки предыдущих матчей
+        function loadPastMatches() {
+            $.ajax({
+                url: '/api/matches/past', // Замените на ваш API-эндпоинт
+                method: 'GET',
+                success: function(data) {
+                    const pastMatches = $('#pastMatches');
+                    pastMatches.empty();
+                    data.forEach(match => {
+                        const card = `
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${match.match_date}</h5>
+                                        <p class="card-text">
+                                            <strong>${match.home_team}</strong> vs
+                                            <strong>${match.away_team}</strong>
+                                        </p>
+                                        <p class="card-text"><strong>Счет:</strong> ${match.score}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        pastMatches.append(card);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при загрузке предыдущих матчей:", error);
+                }
+            });
+        }
+
+        // Функция для загрузки будущих матчей
+        function loadUpcomingMatches() {
+            $.ajax({
+                url: '/api/matches/upcoming', // Замените на ваш API-эндпоинт
+                method: 'GET',
+                success: function(data) {
+                    const upcomingMatches = $('#upcomingMatches');
+                    upcomingMatches.empty();
+                    data.forEach(match => {
+                        const card = `
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${match.match_date}</h5>
+                                        <p class="card-text">
+                                            <strong>${match.home_team}</strong> vs
+                                            <strong>${match.away_team}</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        upcomingMatches.append(card);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ошибка при загрузке будущих матчей:", error);
+                }
+            });
+        }
+
+        // Функция для выхода
+        function logout() {
+            window.location.href = '/logout'; // Перенаправляем на маршрут /logout
+        }
+
+        // Загрузка данных при загрузке страницы
+        $(document).ready(function() {
+            loadTeamPlayersStats();
+            loadOtherPlayersStats();
+            loadTeamInfo();
+            loadOtherTeamsInfo();
+            loadPastMatches();
+            loadUpcomingMatches();
+        });
+    </script>
+</body>
+</html>
